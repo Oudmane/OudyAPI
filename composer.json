@@ -1,0 +1,13 @@
+{
+    "name": "oudmane/oudyapi",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ayoub Oudmane",
+            "email": "ayoub@oudmane.me"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
