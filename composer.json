@@ -2,12 +2,14 @@
     "name": "oudmane/oudyapi",
     "type": "library",
     "version": "0.8.1",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Oudmane/OudyAPI"
+    },
     "authors": [
         {
             "name": "Ayoub Oudmane",
             "email": "ayoub@oudmane.me"
         }
-    ],
-    "minimum-stability": "dev",
-    "require": {}
+    ]
 }
