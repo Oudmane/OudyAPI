@@ -1,7 +1,8 @@
 {
     "name": "oudmane/oudyapi",
+    "title": "OudyAPI",
     "type": "library",
-    "version": "0.8.1",
+    "version": "0.1.1",
     "repository": {
         "type": "git",
         "url": "git://github.com/Oudmane/OudyAPI"
