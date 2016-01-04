@@ -30,15 +30,16 @@ OudyAPI = {
     },
     send: function(request) {
         if(this.ajax && this.ajax.readyState != 4) {
+            $this = this;
             $.when(this.ajax).done(function() {
-                OudyAPI.send(request);
+                $this.send(request);
             });
         } else {
             request.xhrFields = {
                 withCredentials: true
             };
             this.ajax = $.ajax(
-                this.url.ajax+request.uri+(request.render ? '?render='+request.render : ''),
+                this.url.ajax+request.uri,
                 request
             );
         }
@@ -52,7 +53,8 @@ OudyAPI = {
         };
     },
     get: function(request) {
-        request.data = $.extend({}, OudyAPI.data, request.data);
+        $this = this;
+        request.data = $.extend({}, $this.data, request.data);
         request.method = 'GET';
         this.send(request);
     }
