@@ -1,6 +1,6 @@
 var OudyAPI = {
     url: {
-        socket: null,
+        socket: '',
         ajax: ''
     },
     busy: false,
@@ -14,9 +14,12 @@ var OudyAPI = {
         beforeSend: function(request) {}
     },
     callbacks: {},
+    interface: 'api',
     send: function(request) {
+        if(!request.interface)
+            request.interface = this.interface;
         if(this.socket && this.socket.readyState == 1) {
-            if(request.success && !request.id) {
+            if(request.success && !request.id && request.success) {
                 request.id = this.getID();
                 this.callbacks[request.id] = request.success;
             }
@@ -24,16 +27,27 @@ var OudyAPI = {
             if(typeof request.beforeSend  === 'function')
                 request.beforeSend();
             this.socket.send(JSON.stringify(request));
-        } else if(this.ajax && this.ajax.readyState != 4) {
-            $this = this;
-            $.when(this.ajax).done(function() {
-                $this.send(request);
-            });
         } else {
-            this.ajax = $.ajax(
-                this.url.ajax+request.uri,
-                request
+            request.headers = jQuery.extend(
+                {},
+                {
+                    Interface: request.interface
+                },
+                request.headers || {}
             );
+            if(!request.success)
+                request.success = this.callbacks[request.interface];
+            if(this.ajax && this.ajax.readyState != 4) {
+                $this = this;
+                $.when(this.ajax).done(function() {
+                    $this.send(request);
+                });
+            } else {
+                this.ajax = $.ajax(
+                    this.url.ajax+request.uri,
+                    request
+                );
+            }
         }
     },
     getID: function() {
@@ -54,12 +68,37 @@ var OudyAPI = {
         this.socket.onmessage = function(response) {
             data = JSON.parse(response.data);
             this.$this.events.message(data);
-            if(this.$this.callbacks.hasOwnProperty(data.id))
+            if(data.interface)
+                this.$this.callbacks[data.interface](data.response, data.id);
+            else if(this.$this.callbacks.hasOwnProperty(data.id)) {
                 this.$this.callbacks[data.id](data.response, data.id);
+                delete this.$this.callbacks[data.id];
+            }
         };
     },
     init: function() {
         if(("WebSocket" in window && window.WebSocket != undefined) || ("MozWebSocket" in window))
             this.connect();
     }
+};
+jQuery.fn.URI = function() {
+    switch(this.prop('tagName')) {
+        case 'A':
+            return this[0].href.replace(location.origin, '');
+            break;
+        case 'FORM':
+            return this[0].action.replace(location.origin, '');
+            break;
+        default:
+            return $(this).attr('href');
+            break;
+    }
+};
+jQuery.expr[':'].external = function (a) {
+    var PATTERN_FOR_EXTERNAL_URLS = /^(\w+:)?\/\//;
+    var href = $(a).URI();
+    return href !== undefined && href.search(PATTERN_FOR_EXTERNAL_URLS) !== -1;
+};
+jQuery.expr[':'].internal = function (a) {
+    return $(a).URI() !== undefined && !$.expr[':'].external(a);
 };
