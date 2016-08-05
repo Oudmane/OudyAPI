@@ -1,0 +1,25 @@
+{
+  "name": "oudyapi",
+  "version": "1.0.0",
+  "description": "a JavaScript library I use to make requests to API in Web App",
+  "main": "OudyAPI.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oudmane/OudyAPI.git"
+  },
+  "keywords": [
+    "oudy",
+    "api",
+    "oudyapi",
+    "oudmane"
+  ],
+  "author": "Ayoub Oudmane <ayoub@oudmane.me>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Oudmane/OudyAPI/issues"
+  },
+  "homepage": "https://github.com/Oudmane/OudyAPI#readme",
+  "dependencies": {
+    "jquery": "^3.1.0"
+  }
+}
