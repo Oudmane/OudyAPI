@@ -1,4 +1,5 @@
-var jQuery = require('jquery');
+var jQuery = require('jquery'),
+    OudyAPI;
 
 jQuery.fn.URI = function() {
     switch(this.prop('tagName')) {
@@ -35,19 +36,20 @@ module.exports = {
         close: function(event) {},
         message: function(event) {},
         error: function(event) {},
-        beforeSend: function(request) {}
+        beforeSend: function(request) {},
+        success: function(request) {}
     },
     callbacks: {},
     interface: 'api',
     send: function(request) {
         if(!request.interface)
             request.interface = this.interface;
+        this.events.beforeSend(request);
         if(this.socket && this.socket.readyState == 1) {
             if(request.success && !request.id && request.success) {
                 request.id = this.getID();
                 this.callbacks[request.id] = request.success;
             }
-            this.events.beforeSend(request);
             if(typeof request.beforeSend  === 'function')
                 request.beforeSend();
             this.socket.send(JSON.stringify(request));
@@ -62,15 +64,16 @@ module.exports = {
             if(!request.success)
                 request.success = this.callbacks[request.interface];
             if(this.ajax && this.ajax.readyState != 4) {
-                $this = this;
                 jQuery.when(this.ajax).done(function() {
-                    $this.send(request);
+                    OudyAPI.send(request);
                 });
             } else {
                 this.ajax = jQuery.ajax(
                     this.url.ajax+request.uri,
                     request
-                );
+                ).done(function(response) {
+                    OudyAPI.events.success(response);
+                });
             }
         }
     },
@@ -85,22 +88,22 @@ module.exports = {
     },
     connect: function() {
         this.socket = new WebSocket(this.url.socket);
-        this.socket.$this = this;
         this.socket.onopen = this.events.open;
         this.socket.onerror = this.events.error;
         this.socket.onclose = this.events.close;
         this.socket.onmessage = function(response) {
             data = JSON.parse(response.data);
-            this.$this.events.message(data);
+            OudyAPI.events.message(data);
             if(data.interface)
-                this.$this.callbacks[data.interface](data.response, data.id);
-            else if(this.$this.callbacks.hasOwnProperty(data.id)) {
-                this.$this.callbacks[data.id](data.response, data.id);
-                delete this.$this.callbacks[data.id];
+                OudyAPI.callbacks[data.interface](data.response, data.id);
+            else if(OudyAPI.callbacks.hasOwnProperty(data.id)) {
+                OudyAPI.callbacks[data.id](data.response, data.id);
+                delete OudyAPI.callbacks[data.id];
             }
         };
     },
     init: function() {
+        OudyAPI = this;
         if(("WebSocket" in window && window.WebSocket != undefined) || ("MozWebSocket" in window))
             this.connect();
     }
