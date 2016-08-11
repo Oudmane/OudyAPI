@@ -1,6 +1,6 @@
 {
   "name": "oudyapi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a JavaScript library I use to make requests to API in Web App",
   "main": "OudyAPI.js",
   "repository": {
